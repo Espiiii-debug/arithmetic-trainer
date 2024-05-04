@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Générateur de nombres aléatoires</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+    background-color: #f0f0f0;
+    overflow: hidden;
+  }
+  #container {
+    margin-top: 50px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  h1 {
+    font-size: 1.5em;
+    margin-bottom: 20px;
+    color: #333;
+  }
+  .input-label {
+    font-size: 1em;
+    margin-bottom: 5px;
+    color: #555;
+  }
+  .input-field {
+    padding: 10px;
+    font-size: 1em;
+    border: 2px solid #ccc;
+    border-radius: 5px;
+    width: 200px;
+    margin-bottom: 20px;
+  }
+  #output {
+    font-size: 8em;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #007bff;
+    position: relative;
+    transition: all 0.3s ease-in-out;
+  }
+  #output .number {
+    display: inline-block;
+        opacity: 0;
+        transform: translateY(-50px);
+        transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+      }
+      #output .number.show {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      #buttons {
+        display: flex;
+        gap: 20px;
+      }
+      .button {
+        font-size: 1.2em;
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease-in-out;
+      }
+      .button:hover {
+        background-color: #0056b3;
+      }
+      #resultButton {
+        display: none;
+      }
+      .confetti {
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        z-index: 1;
+        animation: confetti-fall linear 4s infinite;
+      }
+      @keyframes confetti-fall {
+        0% { transform: translateY(-100vh) rotateZ(0); }
+        100% { transform: translateY(100vh) rotateZ(1080deg); }
+      }
+    </style>
+    </head>
+    <body>
+      <div id="container">
+        <h1>Générateur de nombres aléatoires</h1>
+        <label for="intervalInput" class="input-label">Intervalle (en millisecondes) :</label>
+        <input type="number" id="intervalInput" class="input-field" value="1000">
+        <label for="minInput" class="input-label">Nombre minimum :</label>
+        <input type="number" id="minInput" class="input-field" value="-10">
+        <label for="maxInput" class="input-label">Nombre maximum :</label>
+        <input type="number" id="maxInput" class="input-field" value="10">
+        <label for="numberInput" class="input-label">Nombre de nombres à afficher :</label>
+        <input type="number" id="numberInput" class="input-field" value="10">
+        <div id="output">Cliquez sur "Démarrer" pour commencer</div>
+        <div id="buttons">
+          <button id="startButton" class="button">Démarrer</button>
+          <button id="stopButton" class="button" style="display: none;">Arrêter</button>
+          <button id="resultButton" class="button">Afficher le résultat</button>
+        </div>
+      </div>
+    
+      <audio id="resultSound" src="result.mp3"></audio>
+      <audio id="beepSound" src="beep.wav"></audio>
+    
+      <script>
+        let intervalId;
+        let numbersGenerated = 0;
+        let numbers = [];
+    
+        function startRandomNumbers() {
+          const interval = parseInt(document.getElementById('intervalInput').value);
+          const numberCount = parseInt(document.getElementById('numberInput').value);
+          numbersGenerated = 0;
+          numbers = [];
+          document.getElementById('output').innerHTML = "<br>";
+          intervalId = setInterval(generateRandomNumber, interval, numberCount);
+          document.getElementById('startButton').style.display = 'none';
+          document.getElementById('stopButton').style.display = 'inline-block';
+          document.getElementById('resultButton').style.display = 'none';
+        }
+    
+        function stopRandomNumbers() {
+          clearInterval(intervalId);
+          document.getElementById('startButton').style.display = 'inline-block';
+          document.getElementById('stopButton').style.display = 'none';
+          document.getElementById('resultButton').style.display = 'inline-block';
+        }
+    
+        function generateRandomNumber(numberCount) {
+          const min = parseInt(document.getElementById('minInput').value);
+          const max = parseInt(document.getElementById('maxInput').value);
+          const randomNumber = Math.floor(Math.random() * (max - min + 1)) + min;
+          numbers.push(randomNumber);
+          const outputElement = document.getElementById('output');
+          const newNumber = document.createElement('div');
+          newNumber.innerText = randomNumber;
+          newNumber.classList.add('number');
+          outputElement.innerHTML = randomNumber;
+          setTimeout(() => {
+            newNumber.classList.add('show');
+          }, 10);
+          numbersGenerated++;
+          if (numbersGenerated >= numberCount) {
+            stopRandomNumbers();
+          }
+          playSound();
+        }
+    
+        function playSound() {
+          const beep = new Audio('beep.wav');
+          beep.play();
+        }
+    
+        function showResult() {
+          const result = numbers.reduce((acc, curr) => acc + curr, 0);
+          document.getElementById('output').innerHTML = "<div>Résultat du calcul : " + result + "</div>";
+          document.getElementById('resultSound').play();
+          document.getElementById('resultButton').style.display = 'none';
+          createConfetti();
+        }
+    
+        function createConfetti() {
+          const confettiCount = 100;
+          const colors = ['#ff4136', '#ff851b', '#ffdc00', '#2ecc40', '#0074d9', '#b10dc9'];
+          const outputElement = document.getElementById('output');
+          for (let i = 0; i < confettiCount; i++) {
+            const confetti = document.createElement('div');
+            confetti.classList.add('confetti');
+            confetti.style.left = Math.random() * window.innerWidth + 'px';
+            confetti.style.top = Math.random() * window.innerHeight + 'px';
+            confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            confetti.style.animationDelay = Math.random() * 4 + 's';
+            outputElement.appendChild(confetti);
+            setTimeout(() => {
+              confetti.remove();
+            }, 5000);
+          }
+        }
+    
+        document.getElementById('startButton').addEventListener('click', startRandomNumbers);
+        document.getElementById('stopButton').addEventListener('click', stopRandomNumbers);
+        document.getElementById('resultButton').addEventListener('click', showResult);
+      </script>
+    </body>
+    </html>
+    
